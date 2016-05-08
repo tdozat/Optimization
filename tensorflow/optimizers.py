@@ -48,7 +48,8 @@ class Optimizer(object):
     self._slots = {}
   
   #=============================================================
-  def minimize(self, loss, global_step=None, var_list=None, gate_gradients=GATE_OP, aggregation_method=None, colocate_gradients_with_ops=False, name=None):
+  def minimize(self, loss, global_step=None, var_list=None, gate_gradients=GATE_OP,
+               aggregation_method=None, colocate_gradients_with_ops=False, name=None):
     """"""
     
     grads_and_vars = self.compute_gradients(
@@ -59,12 +60,15 @@ class Optimizer(object):
     return self.apply_gradients(grads_and_vars, global_step=global_step, name=name)
   
   #=============================================================
-  def compute_gradients(self, loss, var_list=None, gate_gradients=GATE_OP, aggregation_method=None, colocate_gradients_with_ops=False):
+  def compute_gradients(self, loss, var_list=None, gate_gradients=GATE_OP,
+                        aggregation_method=None, colocate_gradients_with_ops=False):
     """"""
     
     # Error checking
-    if gate_gradients not in [Optimizer.GATE_NONE, Optimizer.GATE_OP, Optimizer.GATE_GRAPH]:
-      raise ValueError("gate_gradients must be one of: Optimizer.GATE_NONE, Optimizer.GATE_OP, Optimizer.GATE_GRAPH. Not %s" % gate_gradients)
+    if gate_gradients not in [Optimizer.GATE_NONE, Optimizer.GATE_OP,
+                              Optimizer.GATE_GRAPH]:
+      raise ValueError("gate_gradients must be one of: Optimizer.GATE_NONE,
+        Optimizer.GATE_OP, Optimizer.GATE_GRAPH. Not %s" % gate_gradients)
     self._assert_valid_dtypes([loss])
     if var_list is None:
       var_list = variables.trainable_variables()
@@ -76,7 +80,10 @@ class Optimizer(object):
     
     # The actual stuff
     var_refs = [x_tm1.ref() for x_tm1 in var_list]
-    grads = gradients.gradients(loss, var_refs, gate_gradients=(gate_gradients == Optimizer.GATE_OP), aggregation_method=aggregation_method, colocate_gradients_with_ops=colocate_gradients_with_ops)
+    grads = gradients.gradients(loss, var_refs,
+                                gate_gradients=(gate_gradients == Optimizer.GATE_OP),
+                                aggregation_method=aggregation_method,
+                                colocate_gradients_with_ops=colocate_gradients_with_ops)
     if gate_gradients == Optimizer.GATE_GRAPH:
       grads = control_flow_ops.tuple(grads)
     grads_and_vars = list(zip(grads, var_list))
@@ -104,7 +111,10 @@ class Optimizer(object):
           idxs, idxs_ = array_ops.unique(g_t.indices)
           g_t_ = math_ops.unsorted_segment_sum(g_t.values, idxs_, array_ops.size(idxs))
           gv += math_ops.reduce_sum(g_t_ * random_ops.random_normal(g_t_.get_shape()))
-    hesses = gradients.gradients(gv, var_refs, gate_gradients=(gate_gradients == Optimizer.GATE_OP), aggregation_method=aggregation_method, colocate_gradients_with_ops=colocate_gradients_with_ops)
+    hesses = gradients.gradients(gv, var_refs,
+                                 gate_gradients=(gate_gradients == Optimizer.GATE_OP),
+                                 aggregation_method=aggregation_method,
+                                 colocate_gradients_with_ops=colocate_gradients_with_ops)
     return zip([g_t for g_t, _ in grads_and_vars], [x_tm1 for _, x_tm1 in grads_and_vars], hesses)
   
   #=============================================================
@@ -397,7 +407,8 @@ class BaseOptimizer(Optimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=1., eps=1e-16, chi=0., clip=0., noise=None, save_step=False, save_grad=False, use_locking=False, name='Base'):
+  def __init__(self, lr=1., eps=1e-16, chi=0., clip=0., noise=None,
+               save_step=False, save_grad=False, use_locking=False, name='Base'):
     """
     Inputs:
       lr: the global learning rate (default is 1; set to None for nifty second-
@@ -609,7 +620,8 @@ class AdamOptimizer(BaseOptimizer):
   """"""
   
   #=============================================================
-  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16, chi=0., clip=0., noise=None, use_locking=False, name='Adam'):
+  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16,
+               chi=0., clip=0., noise=None, use_locking=False, name='Adam'):
     """
     Implements Adam
     Inputs:
@@ -620,7 +632,8 @@ class AdamOptimizer(BaseOptimizer):
            default is .9)
     """
     
-    super(AdamOptimizer, self).__init__(lr=lr, eps=eps, chi=chi, clip=clip, noise=noise, use_locking=use_locking, name=name)
+    super(AdamOptimizer, self).__init__(lr=lr, eps=eps, chi=chi, clip=clip, noise=noise,
+                                        use_locking=use_locking, name=name)
     self._mu = float(mu)
     self._ups = float(ups)
     self._eps = float(eps)
@@ -735,10 +748,13 @@ class NadamOptimizer(AdamOptimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16, chi=0., clip=0., noise=None, use_locking=False, name='Nadam'):
+  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16,
+               chi=0., clip=0., noise=None, use_locking=False, name='Nadam'):
     """"""
     
-    super(NadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps, chi=chi, clip=clip, noise=noise, use_locking=use_locking, name=name)
+    super(NadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps,
+                                         chi=chi, clip=clip, noise=noise,
+                                         use_locking=use_locking, name=name)
   
   #=============================================================
   def _apply_dense(self, g_t, x_tm1, prepare):
@@ -818,10 +834,13 @@ class RadamOptimizer(AdamOptimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=0.002, mu=.9, gamma=.05, ups=.9, eps=1e-7, chi=0., clip=0., noise=None, use_locking=False, name='Radam'):
+  def __init__(self, lr=0.002, mu=.9, gamma=.05, ups=.9, eps=1e-7,
+               chi=0., clip=0., noise=None, use_locking=False, name='Radam'):
     """"""
     
-    super(RadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps, chi=chi, clip=clip, noise=noise, use_locking=use_locking, name=name)
+    super(RadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps,
+                                         chi=chi, clip=clip, noise=noise,
+                                         use_locking=use_locking, name=name)
     self._gamma = float(gamma)
   
   #=============================================================
@@ -898,7 +917,8 @@ if __name__ == '__main__':
   Q = tf.Variable(A)
   loss_op = tf.reduce_mean((tf.matmul(Q, Q, transpose_a=True) - I)**2 / 2 + (Q - tf.transpose(Q))**2 / 2)
   Q2 = Q**2
-  true_hess_op = tf.sqrt(tf.reduce_sum((2*(Q2 + tf.reduce_sum(Q2, 0, keep_dims=True) + tf.reduce_sum(Q2, 1, keep_dims=True) - I)/100**2)**2))
+  true_hess_op = tf.sqrt(tf.reduce_sum((2*(Q2 + tf.reduce_sum(Q2, 0, keep_dims=True) +
+                                           tf.reduce_sum(Q2, 1, keep_dims=True) - I)/100**2)**2))
   gs = tf.Variable(0., trainable=False)
   sig = .005/(1+tf.exp((2*gs-5000)/1000))
   for optimizer in (RadamOptimizer,):
@@ -914,11 +934,6 @@ if __name__ == '__main__':
           print('Loss: %.1e' % (loss,), end='\r')
           sys.stdout.flush()
           
-          #loss, hess, true_hess, step, _ = sess.run([loss_op, hess_op, true_hess_op, step_op, train_op])
-          #print('Loss: %.1e, Hess: %.1e, True Hess: %.1e, Step: (%.1e,%.1e)' % (loss, hess, true_hess, np.mean(step), np.std(step)), end='\r')
-          #sys.stdout.flush()
-          #raw_input()
         print(opt.average(Q))
       print()  
-      #print('Final loss: %.1e, Final Hess: %.1e, Final True Hess: %.1e' % (loss, hess, true_hess))
   

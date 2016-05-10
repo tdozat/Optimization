@@ -67,8 +67,8 @@ class Optimizer(object):
     # Error checking
     if gate_gradients not in [Optimizer.GATE_NONE, Optimizer.GATE_OP,
                               Optimizer.GATE_GRAPH]:
-      raise ValueError("gate_gradients must be one of: Optimizer.GATE_NONE,
-        Optimizer.GATE_OP, Optimizer.GATE_GRAPH. Not %s" % gate_gradients)
+      raise ValueError("gate_gradients must be one of: Optimizer.GATE_NONE, " +
+        "Optimizer.GATE_OP, Optimizer.GATE_GRAPH. Not %s" % gate_gradients)
     self._assert_valid_dtypes([loss])
     if var_list is None:
       var_list = variables.trainable_variables()
@@ -407,8 +407,7 @@ class BaseOptimizer(Optimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=1., eps=1e-16, chi=0., clip=0., noise=None,
-               save_step=False, save_grad=False, use_locking=False, name='Base'):
+  def __init__(self, lr=1., eps=1e-16, chi=0., clip=0., noise=None, save_step=False, save_grad=False, use_locking=False, name='Base'):
     """
     Inputs:
       lr: the global learning rate (default is 1; set to None for nifty second-
@@ -437,6 +436,41 @@ class BaseOptimizer(Optimizer):
     self._chi = float(chi)
     self._clip = float(clip)
     self._noise = noise
+  
+  #=============================================================
+  @property
+  def learning_rate(self):
+    """"""
+    
+    return self._lr
+  
+  #=============================================================
+  @property
+  def epsilon(self):
+    """"""
+    
+    return self._eps
+  
+  #=============================================================
+  @property
+  def chi(self):
+    """"""
+    
+    return self._chi
+  
+  #=============================================================
+  @property
+  def clip(self):
+    """"""
+    
+    return self._clip
+  
+  #=============================================================
+  @property
+  def noise(self):
+    """"""
+    
+    return self._noise
   
   #=============================================================
   def _create_slots(self, grads_and_vars):
@@ -636,10 +670,20 @@ class AdamOptimizer(BaseOptimizer):
                                         use_locking=use_locking, name=name)
     self._mu = float(mu)
     self._ups = float(ups)
-    self._eps = float(eps)
-    self._chi = float(chi)
-    self._clip = float(clip)
-    self._noise = noise
+    
+  #=============================================================
+  @property
+  def mu(self):
+    """"""
+    
+    return self._mu
+  
+  #=============================================================
+  @property
+  def upsilon(self):
+    """"""
+    
+    return self._ups
   
   #=============================================================
   def _create_slots(self, grads_and_vars):
@@ -748,8 +792,7 @@ class NadamOptimizer(AdamOptimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16,
-               chi=0., clip=0., noise=None, use_locking=False, name='Nadam'):
+  def __init__(self, lr=0.002, mu=.9, ups=.9, eps=1e-16, chi=0., clip=0., noise=None, use_locking=False, name='Nadam'):
     """"""
     
     super(NadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps,
@@ -834,14 +877,20 @@ class RadamOptimizer(AdamOptimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=0.002, mu=.9, gamma=.05, ups=.9, eps=1e-7,
-               chi=0., clip=0., noise=None, use_locking=False, name='Radam'):
+  def __init__(self, lr=0.002, mu=.9, gamma=.05, ups=.9, eps=1e-7, chi=0., clip=0., noise=None, use_locking=False, name='Radam'):
     """"""
     
     super(RadamOptimizer, self).__init__(lr=lr, mu=mu, ups=ups, eps=eps,
                                          chi=chi, clip=clip, noise=noise,
                                          use_locking=use_locking, name=name)
     self._gamma = float(gamma)
+  
+  #=============================================================
+  @property
+  def gamma(self):
+    """"""
+    
+    return self._gamma
   
   #=============================================================
   def _apply_dense(self, g_t, x_tm1, prepare):
@@ -887,7 +936,7 @@ class RadamOptimizer(AdamOptimizer):
       m_bar_t_ = g_t_
     
     if self._ups > 0:
-      v_t = self._sparse_moving_average(x_tm1, idxs, g_t_**2, 'v', self._ups)
+      v_and_t = self._sparse_moving_average(x_tm1, idxs, g_t_**2, 'v', self._ups)
       v_t_ = array_ops.gather(v_and_t[0], idxs)
       eps_t = ops.convert_to_tensor(self._eps)
       v_bar_t_ = math_ops.sqrt(v_t_) + eps_t

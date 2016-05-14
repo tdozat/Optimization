@@ -37,7 +37,7 @@ v_t = ups*v_tm1 + (1-ups)*g_t**2
 v_hat_t = v_t / (1-ups**t)
 x_t = x_tm1 - g_t / sqrt(v_hat_t + eps)
 ```
-Adam then takes these two algorithms and sticks them together, such that `x_t = x_tm1 - m_bar_t / sqrt(v_hat_t + eps)`, giving it the same expected step size as the corrected version of AdaGrad. Nice!
+Adam then takes these two algorithms and sticks them together, such that `x_t = x_tm1 - m_hat_t / sqrt(v_hat_t + eps)`, giving it the same expected step size as the corrected version of AdaGrad. Nice!
 
 You can also do initialization bias correction with a schedule on `mu` and `ups` such that:
 ```python

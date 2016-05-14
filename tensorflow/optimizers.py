@@ -407,7 +407,7 @@ class BaseOptimizer(Optimizer):
   """
   
   #=============================================================
-  def __init__(self, lr=1., eps=1e-16, chi=0., clip=0., noise=None, save_step=False, save_grad=False, use_locking=False, name='Base'):
+  def __init__(self, lr=1., eps=1e-16, chi=0., clip=None, noise=None, save_step=False, save_grad=False, use_locking=False, name='Base'):
     """
     Inputs:
       lr: the global learning rate (default is 1; set to None for nifty second-
@@ -415,7 +415,7 @@ class BaseOptimizer(Optimizer):
       eps: the stability constant sometimes needed (default is 1e-16)
       chi: the decay constant for temporal averaging (default is 0 for no
            averaging)
-      clip: the maximum global norm for the updates (default is 0 for no
+      clip: the maximum global norm for the updates (default is None for no
             clipping)
       noise: how much noise to add to the updates (default is None for no
              noise)
@@ -551,7 +551,7 @@ class BaseOptimizer(Optimizer):
         s_t += random_ops.random_normal(x_tm1.initialized_value().get_shape(), stddev=self._noise)
         cache[0] = s_t
     
-    if self._clip > 0:
+    if self._clip is not None:
       S_t = [cache[0] for cache in caches]
       S_t, _ = clip_ops.clip_by_global_norm(S_t, self._clip)
       for cache, s_t in zip(caches, S_t):
@@ -720,7 +720,7 @@ class AdamOptimizer(BaseOptimizer):
     if self._ups > 0:
       v_and_t = self._dense_moving_average(x_tm1, g_t**2, 'v', self._ups)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t = math_ops.sqrt(v_and_t[0]) + eps_t
+      v_bar_t = math_ops.sqrt(v_and_t[0] + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t = 1.
@@ -748,7 +748,7 @@ class AdamOptimizer(BaseOptimizer):
       v_and_t = self._sparse_moving_average(x_tm1, idxs, g_t_**2, 'v', self._ups)
       v_t_ = array_ops.gather(v_and_t[0], idxs)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t_ = math_ops.sqrt(v_t_) + eps_t
+      v_bar_t_ = math_ops.sqrt(v_t_ + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t_ = 1.
@@ -819,7 +819,7 @@ class NadamOptimizer(AdamOptimizer):
     if self._ups > 0:
       v_and_t = self._dense_moving_average(x_tm1, g_t**2, 'v', self._ups)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t = math_ops.sqrt(v_and_t[0]) + eps_t
+      v_bar_t = math_ops.sqrt(v_and_t[0] + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t = 1.
@@ -853,7 +853,7 @@ class NadamOptimizer(AdamOptimizer):
       v_and_t = self._sparse_moving_average(x_tm1, idxs, g_t_**2, 'v', self._ups)
       v_t_ = array_ops.gather(v_and_t[0], idxs)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t_ = math_ops.sqrt(v_t_) + eps_t
+      v_bar_t_ = math_ops.sqrt(v_t_ + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t_ = 1.
@@ -909,7 +909,7 @@ class RadamOptimizer(AdamOptimizer):
     if self._ups > 0:
       v_and_t = self._dense_moving_average(x_tm1, g_t**2, 'v', self._ups)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t = math_ops.sqrt(v_and_t[0]) + eps_t
+      v_bar_t = math_ops.sqrt(v_and_t[0] + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t = 1.
@@ -939,7 +939,7 @@ class RadamOptimizer(AdamOptimizer):
       v_and_t = self._sparse_moving_average(x_tm1, idxs, g_t_**2, 'v', self._ups)
       v_t_ = array_ops.gather(v_and_t[0], idxs)
       eps_t = ops.convert_to_tensor(self._eps)
-      v_bar_t_ = math_ops.sqrt(v_t_) + eps_t
+      v_bar_t_ = math_ops.sqrt(v_t_ + eps_t)
       updates.extend(v_and_t)
     else:
       v_bar_t_ = 1.

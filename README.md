@@ -31,7 +31,7 @@ The expected step size here is approximately `lr_t / sqrt(t) * E[|g_t / sqrt(E[g
 v_t = ups*v_tm1 + (1-ups)*g_t**2
 x_t = x_tm1 - g_t / sqrt(v_t + eps)
 ```
-resulting in an expected step size of `lr_t / (1-ups**t) * E[|g_t / sqrt(E[g_t**2])|]`, where `ups` is the decay factor. The moving average gets rid of the `1 / sqrt(t)`, but introduces a `1 / (1-ups**t)` that can be almost as devastating, resulting in super high effective learning rates in the first few iterations. These super high learning rates often result in immediate divergeance if you don't use a lower learning rate--but the lower learning rate can cripple learning after the `ups**t` has basically reached zero. Adam fixes this as well, so that the expected step size is roughly `lr_t * E[|g_t / sqrt(E[g_t**2])|]` and only depends on the learning rate and properties of the gradient that we can assume will be relatively stable.
+resulting in an expected step size of `lr_t / sqrt(1-ups**t) * E[|g_t / sqrt(E[g_t**2])|]`, where `ups` is the decay factor. The moving average gets rid of the `1 / sqrt(t)`, but introduces a `1 / sqrt(1-ups**t)` that can be pretty bad as well, resulting in higher effective learning rates in the first few iterations. These higher-than-normal effective learning rates can result in immediate divergeance if you don't use a lower learning rate--but the lower learning rate can cripple learning after the `ups**t` has basically reached zero. Adam fixes this as well, so that the expected step size is roughly `lr_t * E[|g_t / sqrt(E[g_t**2])|]` and only depends on the learning rate and properties of the gradient that we can assume will be relatively stable.
 ```python
 v_t = ups*v_tm1 + (1-ups)*g_t**2
 v_hat_t = v_t / (1-ups**t)

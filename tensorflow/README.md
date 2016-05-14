@@ -19,6 +19,15 @@
   - `gamma`: the interpolation factor (default is .05)
 
 ## Algorithms
+* SGD with OL learning rate:
+```python
+g_t = grads(loss, x_tm1)
+y_t = g_t - g_tm1
+lr = dot(s_tm1, s_tm1) / dot(s_tm1, y_t)
+s_t = -lr * g_t
+x_t = x_tm1 + s_t
+```
+
 * Adam
 ```python
 g_t = grads(loss, x_tm1)

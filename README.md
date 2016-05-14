@@ -55,7 +55,7 @@ g_t = grads(loss, x_tm1 - mu*m_tm1) ###
 m_t = mu*m_tm1 + lr*g_t
 x_t = x_tm1 - m_t
 ```
-But the way g_t is defined is awkward and difficult to implement. So let's simplify it a bit by first taking `mu*m_tm1` out of `g_t` and putting it in a different variable:
+But the way `g_t` is defined is awkward and difficult to implement. So let's simplify it a bit by first taking `mu*m_tm1` out of `g_t` and putting it in a different variable:
 ```python
 x_hat_t = x_tm1 - mu*m_tm1 ###
 g_t = grads(loss, x_hat_t) ###

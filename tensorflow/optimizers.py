@@ -369,12 +369,12 @@ class Optimizer(object):
     slot = variables.Variable(val, name=scope, trainable=False)
     # pylint: disable=protected-access
     if isinstance(primary, variables.Variable) and primary._save_slice_info:
-      # Primary is a partitioned x_tm1iable, so we need to also indicate that
-      # the slot is a partitioned x_tm1iable.  Slots have the same partitioning
+      # Primary is a partitioned variable, so we need to also indicate that
+      # the slot is a partitioned variable.  Slots have the same partitioning
       # as their primaries.
       real_slot_name = scope[len(primary.op.name + "/"):-1]
       slice_info = primary._save_slice_info
-      slot._set_save_slice_info(x_tm1iables.Variable.SaveSliceInfo(
+      slot._set_save_slice_info(variables.Variable.SaveSliceInfo(
           slice_info.full_name + "/" + real_slot_name,
           slice_info.full_shape[:],
           slice_info.var_offset[:],
